@@ -72,6 +72,8 @@ fit <- stan(file = 'schools.stan', data = schools_dat)
   # 2: In as.POSIXlt.POSIXct(Sys.time()) :
   #   unknown timezone 'zone/tz/2021a.1.0/zoneinfo/America/New_York'
 
+# solutaion: Change Delta
+
 fit <- stan(file = 'schools.stan', 
             data = schools_dat,
             control = list(adapt_delta = 0.99))
