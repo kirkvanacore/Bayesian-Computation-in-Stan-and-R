@@ -1,3 +1,10 @@
+install.packages("gitcreds")
+
+library(gitcreds)
+
+gitcreds_set()
+
+4require()
 #### How to Use RStan ####
 
 #The rest of this document assumes that you have already
