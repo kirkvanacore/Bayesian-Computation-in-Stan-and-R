@@ -4,7 +4,12 @@ library(gitcreds)
 
 gitcreds_set()
 
-4require()
+install.packages("credentials")
+
+library(credentials)
+
+gitcreds_set()
+
 #### How to Use RStan ####
 
 #The rest of this document assumes that you have already
