@@ -1,0 +1,110 @@
+---
+title: "Homework1"
+author: "Kirk Vanacore"
+date: "9/8/2021"
+output: html_document
+---
+# Homework 1
+## Bayesian Computation in Stan and R 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load/Setup STRAN
+
+```{r cars}
+library(rstan) # observe startup messages
+options(mc.cores = parallel::detectCores()) # Use all local cores (does this work for all r packages?)
+rstan_options(auto_write = TRUE) # saves stan to hard drive
+Sys.setenv(TZ = "America/Toronto") # this deals with a time zone bug issue that was causes an error when running the model
+
+```
+
+#Example 1: Eight Schools
+This is an example in Section 5.5 of Gelman et al (2003), which studied coaching effects from eight schools. For simplicity, we call this example "eight schools."
+
+## Wright STAN file
+We start by writing a Stan program for the model in a text file. If you are using RStudio version 1.2.x or greater, click on File -> New File -> Stan File . Otherwise, open your favorite text editor. Either way, paste in the following and save your work to a file called schools.stan in R's working directory (which can be seen by executing getwd())
+You can also embed plots, for example:
+
+// saved as schools.stan
+data {
+  int<lower=0> J;         // number of schools 
+  real y[J];              // estimated treatment effects
+  real<lower=0> sigma[J]; // standard error of effect estimates 
+}
+parameters {
+  real mu;                // population treatment effect
+  real<lower=0> tau;      // standard deviation in treatment effects
+  vector[J] eta;          // unscaled deviation from mu by school
+}
+transformed parameters {
+  vector[J] theta = mu + tau * eta;        // school treatment effects
+}
+model {
+  target += normal_lpdf(eta | 0, 1);       // prior log-density
+  target += normal_lpdf(y | theta, sigma); // log-likelihood
+}
+
+Be sure that your Stan programs ends in a blank line without any characters including spaces and comments.
+
+In this Stan program, we let theta be a transformation of mu, eta, and tau instead of declaring theta in the parameters block, which allows the sampler will run more efficiently . 
+
+### Prepare data
+We can prepare the data (which typically is a named list) in R with:
+```{r, echo=FALSE}
+rm(list = ls())
+schools_dat <- list(J = 8, 
+                    y = c(28,  8, -3,  7, -1,  1, 18, 12),
+                    sigma = c(15, 10, 16, 11,  9, 11, 10, 18))
+```
+
+And we can get a fit with the following R command. Note that the argument to file = should point to where the file is on your file system unless you have put it in the working directory of R in which case the below will work.
+
+
+```{r}
+fit <- stan(file = 'schools.stan', data = schools_dat)
+```
+
+##unexpected WARNINGS: 
+Warning message:
+In utils::install.packages("openssl", repos = "https://cran.rstudio.com/") :
+installation of package ‘openssl’ had non-zero exit status
+
+
+## Output 
+```{R}
+print(fit)
+
+```
+
+# Plot Paramteres
+```{R}
+
+plot(fit)
+
+```
+
+
+```{R}
+
+pairs(fit, pars = c("mu", "tau", "lp__"))
+
+```
+
+
+```{R}
+
+la <- extract(fit, permuted = TRUE) # return a list of arrays 
+mu <- la$mu 
+
+### return an array of three dimensions: iterations, chains, parameters 
+a <- extract(fit, permuted = FALSE) 
+
+### use S3 functions on stanfit objects
+a2 <- as.array(fit)
+m <- as.matrix(fit)
+d <- as.data.frame(fit)
+
+```
