@@ -1,0 +1,162 @@
+---
+title: "Homework 2"
+author: "Kirk Vanacore"
+date: "9/8/2021"
+output: html_document
+---
+## Bayesian Computation in Stan and R 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## Load/Setup STRAN
+
+```{r}
+library(rstan) # observe startup messages
+options(mc.cores = parallel::detectCores()) # Use all local cores (does this work for all r packages?)
+rstan_options(auto_write = TRUE) # saves stan to hard drive
+Sys.setenv(TZ = "America/Toronto") # this deals with a time zone bug issue that was causes an error when running the model
+
+```
+
+This is an example in Section 5.5 of Gelman et al (2003), which studied coaching effects from eight schools. For simplicity, we call this example "eight schools."
+
+## Write STAN file
+We start by writing a Stan program for the model in a text file. If you are using RStudio version 1.2.x or greater, click on File -> New File -> Stan File . Otherwise, open your favorite text editor. Either way, paste in the following and save your work to a file called schools.stan in R's working directory (which can be seen by executing getwd())
+You can also embed plots, for example:
+
+```
+// saved as schools.stan
+data {
+  int<lower=0> J;         // number of schools 
+  real y[J];              // estimated treatment effects
+  real<lower=0> sigma[J]; // standard error of effect estimates 
+}
+parameters {
+  real mu;                // population treatment effect
+  real<lower=0> tau;      // standard deviation in treatment effects
+  vector[J] eta;          // unscaled deviation from mu by school
+}
+transformed parameters {
+  vector[J] theta = mu + tau * eta;        // school treatment effects
+}
+model {
+  target += normal_lpdf(eta | 0, 1);       // prior log-density
+  target += normal_lpdf(y | theta, sigma); // log-likelihood
+}
+```
+
+Be sure that your Stan programs ends in a blank line without any characters including spaces and comments.
+
+In this Stan program, we let theta be a transformation of mu, eta, and tau instead of declaring theta in the parameters block, which allows the sampler will run more efficiently . 
+
+RESEARCH QUETIONS:
+Does the treatment effect vary between schools 
+
+### Prepare data
+We can prepare the data (which typically is a named list) in R with:
+```{r}
+rm(list = ls())
+schools_dat <- list(J = 9, 
+                    y = c(5.41,  5, 6.29,  10.95, 9.53, 7.28, 6.59, 2.72, 6.94), 
+                    sigma = c(0.33, 0.25, 0.2, 0.12,  0.19, 0.23, 0.24, 0.22, 0.17)) # treatment effects for each school
+
+condition_dat <- list(J = 4, 
+                    y = c(7.41, 6.01, 7.21, 7.33), 
+                    sigma = c(0.18, 0.18, 0.13, 0.18)) # treatment effects for each school
+
+#WHY DO WE USE THE SE? SHOULDN"T SIGMA BE THE SD (its it because the SE takes into account sample size?)
+
+```
+
+And we can get a fit with the following R command. Note that the argument to file = should point to where the file is on your file system unless you have put it in the working directory of R in which case the below will work.
+
+# School Models
+```{r}
+fit <- stan(file = 'schools.stan', data = schools_dat)
+```
+
+
+
+## Output 
+```{R}
+print(fit)
+```
+
+## Plot Paramteres
+```{R}
+
+plot(fit, pars = c("mu",
+                   "tau",
+                   "eta[1]", # differences between the overall mean and the cluster mean 
+                   "eta[2]",
+                   "eta[3]",
+                   "eta[4]",
+                   "eta[5]",
+                   "eta[6]",
+                   "eta[7]",
+                   "eta[8]",
+                   "eta[9]"
+                   ))
+
+
+```
+
+# 
+yi ~ N(theta1i, sigmai)
+theta ~ N(mu, tau)
+
+
+
+```{R}
+
+pairs(fit, pars = c("mu", # means 
+                    "tau", # between cluster variance
+                    "lp__" #?
+                    ))
+
+```
+
+# Condition Models
+```{r}
+fit2 <- stan(file = 'schools.stan', data = condition_dat)
+```
+
+
+## Plot Paramteres
+```{R}
+
+plot(fit2, pars = c("mu",
+                   "tau",
+                   "eta[1]",
+                   "eta[2]",
+                   "eta[3]",
+                   "eta[4]"
+                   ))
+
+
+```
+```{R}
+pairs(fit, pars = c("mu", # mean
+                    "tau", # between cluster variance
+                    "lp__")) # some version of the posteior 
+```
+
+
+# other code
+```{R}
+
+la <- extract(fit, permuted = TRUE) # return a list of arrays 
+mu <- la$mu 
+
+### return an array of three dimensions: iterations, chains, parameters 
+a <- extract(fit, permuted = FALSE) 
+
+### use S3 functions on stanfit objects
+a2 <- as.array(fit)
+m <- as.matrix(fit)
+d <- as.data.frame(fit)
+
+```
