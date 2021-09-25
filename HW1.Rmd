@@ -4,9 +4,8 @@ author: "Kirk Vanacore"
 date: "9/8/2021"
 output: html_document
 ---
-# Homework 1
-## Bayesian Computation in Stan and R 
 
+## Bayesian Computation in Stan and R 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
