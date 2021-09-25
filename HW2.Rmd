@@ -51,9 +51,8 @@ model {
 Be sure that your Stan programs ends in a blank line without any characters including spaces and comments.
 
 In this Stan program, we let theta be a transformation of mu, eta, and tau instead of declaring theta in the parameters block, which allows the sampler will run more efficiently . 
+ 
 
-RESEARCH QUETIONS:
-Does the treatment effect vary between schools 
 
 ### Prepare data
 We can prepare the data (which typically is a named list) in R with:
@@ -74,6 +73,8 @@ condition_dat <- list(J = 4,
 And we can get a fit with the following R command. Note that the argument to file = should point to where the file is on your file system unless you have put it in the working directory of R in which case the below will work.
 
 # School Models
+RESEARCH QUESTIONS:
+Does the postest vary between schools?
 ```{r}
 fit <- stan(file = 'schools.stan', data = schools_dat)
 ```
@@ -120,6 +121,8 @@ pairs(fit, pars = c("mu", # means
 ```
 
 # Condition Models
+RESEARCH QUESTIONS:
+Does the posttest vary between Conditions?
 ```{r}
 fit2 <- stan(file = 'schools.stan', data = condition_dat)
 ```
