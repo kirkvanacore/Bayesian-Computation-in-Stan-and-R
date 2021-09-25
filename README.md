@@ -2,7 +2,7 @@
 ## Homework
 [HW1](https://kirkvanacore.github.io/Bayesian-Computation-in-Stan-and-R/HW1.html)
 
-[HW2]
+[HW2](https://kirkvanacore.github.io/Bayesian-Computation-in-Stan-and-R/HW1.htm2)
 
 [HW3]
 
