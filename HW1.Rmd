@@ -20,13 +20,14 @@ Sys.setenv(TZ = "America/Toronto") # this deals with a time zone bug issue that 
 
 ```
 
-#Example 1: Eight Schools
+# Example 1: Eight Schools
 This is an example in Section 5.5 of Gelman et al (2003), which studied coaching effects from eight schools. For simplicity, we call this example "eight schools."
 
-## Wright STAN file
+## Write STAN file
 We start by writing a Stan program for the model in a text file. If you are using RStudio version 1.2.x or greater, click on File -> New File -> Stan File . Otherwise, open your favorite text editor. Either way, paste in the following and save your work to a file called schools.stan in R's working directory (which can be seen by executing getwd())
 You can also embed plots, for example:
 
+```
 // saved as schools.stan
 data {
   int<lower=0> J;         // number of schools 
@@ -46,6 +47,7 @@ model {
   target += normal_lpdf(y | theta, sigma); // log-likelihood
 }
 
+```
 Be sure that your Stan programs ends in a blank line without any characters including spaces and comments.
 
 In this Stan program, we let theta be a transformation of mu, eta, and tau instead of declaring theta in the parameters block, which allows the sampler will run more efficiently . 
