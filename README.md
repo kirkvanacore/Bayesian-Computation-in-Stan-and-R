@@ -4,7 +4,7 @@
 
 [HW2](https://kirkvanacore.github.io/Bayesian-Computation-in-Stan-and-R/HW2.html)
 
-[HW3]
+[HW3](https://kirkvanacore.github.io/Bayesian-Computation-in-Stan-and-R/HW3.html)
 
 ## Reading
 [Bayesian Data Analysis](https://bookdown.org/marklhc/notes_bookdown/)
