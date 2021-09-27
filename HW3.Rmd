@@ -209,7 +209,7 @@ print(fit2)
 ```
 
 How do I evaluate the Coefficients For example: b2 CIs (maybe that is not what they are) overlap zero. Does this mean that we can't say that it is 95% probable that the effect of FH2T is not zero? I'm I think about this incorrectly because are not doing null hypotheses testing.
-
+ 
 ```{R}
 plot(fit2)
 ```
