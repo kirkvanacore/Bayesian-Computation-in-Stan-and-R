@@ -22,7 +22,7 @@ library(dplyr)
 ```
 
 
-# Homework 3
+# Homework 3 
 
 1) make a stan_data object like this:
 > stan_data= list(N=nrow(dat), y=dat$post.math.total,pretest=dat$pre.math.total)
