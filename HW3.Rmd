@@ -167,6 +167,20 @@ model {
     + b4*ASSISTments , sigma);
 }
 
+generated quantities {
+  vector[N] yhat;
+//vector[N] ynew;
+  for(i in 1:N){
+    yhat[i] = b0 
+    + b1*pretest_MC 
+    + b2*FH2T 
+    + b3*Dragon 
+    + b4*ASSISTments
+  
+  }
+
+}
+
 ```
 
 ## Prepare Data
@@ -210,6 +224,28 @@ print(fit2)
 
 How do I evaluate the Coefficients For example: b2 CIs (maybe that is not what they are) overlap zero. Does this mean that we can't say that it is 95% probable that the effect of FH2T is not zero? I'm I think about this incorrectly because are not doing null hypotheses testing.
  
+ 
 ```{R}
-plot(fit2)
+traceplot(fit2,inc_warmup =F)
+
+```
+ 
+```{R}
+print(fit2,par="yhat",include=FALSE)
+# n_eff -> higher -> less correlation between successive draws for post dist 
+  # higher is better -> more confident
+  # effective DF -> the draws that you have are giving you and equal amounts of information that many indepoendet draws
+  # did the chain fit the data well (not the same as does the model produced by the chain fit the data well)
+
+
+```
+
+```{R}
+# gives you the draws
+samp <- extract(fit2, pars="yhat",include=FALSE)
+head(samp$b1)
+mean(samp$b1)
+mean(samp$b1>0)
+mean(samp$b2>samp$b3) # probability that one condition will produce
+plot(samp$b1, samp$b2)
 ```
