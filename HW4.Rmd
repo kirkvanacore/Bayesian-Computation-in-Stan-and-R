@@ -1,0 +1,182 @@
+---
+title: "Homework 4"
+author: "Kirk Vanacore"
+date: "10/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Homework 4
+
+
+## Load/Setup STRAN
+
+```{r}
+library(rstan) # observe startup messages
+options(mc.cores = parallel::detectCores()) # Use all local cores (does this work for all r packages?)
+rstan_options(auto_write = TRUE) # saves stan to hard drive
+Sys.setenv(TZ = "America/Toronto") # this deals with a time zone bug issue that was causes an error when running the model
+library(dplyr)
+```
+
+# PART 1
+
+
+OK Here's another HW (I know I really gotta give these to you on Thursdays... Like always, just do what you can, and let me know if you have any questions. Save all of your fitted models in .RData files so we can look at them on Thursday without re-fitting them. 
+
+We're going to introduce something non-identifiable into the model you fit, and see what happens.
+The new model will be Y=b0+(b1a+b1b)*pretest+b2*FH2T + b3*Dragon+ b4*ASSISTments+epsilon
+
+We'll be building off the file you wrote last time, HW3stanScript2.stan. First, make the following changes:
+In the parameters section, replace
+real b1;
+with
+real b1a;
+real b2b;
+DONE
+
+between the "parameters" and the "model" sections, add in a new section called "transformed parameters" that looks like this:
+transformed parameters {
+  real b1;
+  b1=b1a+b1b;
+}
+DONE
+
+finally, in the "model" section, replace
++ b1*pretest_MC
+with
++ (b1a+b1b)*pretest_MC
+ DONE
+ 
+You might want to comment out the "generated parameters" section, too. We won't use it for this (I don't think that leaving it in will hurt though). 
+
+
+```
+// The input data is a vector 'y' of length 'N'.
+data {
+  int<lower=0> N;
+  vector[N] y;
+  vector[N] pretest_MC;
+}
+
+// yi = b0 + b1xi1 + ei
+// ei ~ N(0, sigma)
+// yi ~ N(b0 + b1xi1, sigma) <- This is the modle
+
+
+// The parameters accepted by the model. Our model
+// accepts two parameters 'mu' and 'sigma'.
+parameters {
+  real<lower=0> sigma;
+  real b0;
+  real b1a;
+  real b2b;
+}
+
+transformed paramters {
+  real b1;
+  b1=b1a+b1b;
+}
+
+// The model to be estimated. We model the output
+// 'y' to be normally distributed with mean 'mu'
+// and standard deviation 'sigma'.
+model {
+  y ~ normal(b0 + (b1a+b1b)*pretest_MC
+, sigma);
+}
+
+```
+
+
+Now fit the new model. This might take a while--maybe start it before you go to sleep at night and check it in the morning. Also, save the fitted model, like 
+save(fit3,file="unidentifiedFit.RData") 
+or whatever. 
+
+
+## Prepare data
+```{r}
+
+assess <-read.csv("Assessment_merged_2021_07_16_state_assessment_N=4321 - Sheet1.csv", na.strings = c(""))
+colnames(assess)
+# Clean data
+assess <- assess %>%
+  filter(is.na(post.percentage_math_score) == F,
+         is.na(pre.percentage_math_score) == F,
+         
+    # remove students who are not in original random assignment
+    is.na(rdm_condition) == F,
+    # remove students who are in resource
+     assess$rdm_condition != "Dragon-Resource" & assess$rdm_condition != "FH2T-Resource",
+    # S03 drop schools 
+     final_school_id != "S03" & initial_school_id != "S03"
+    & final_school_id != "S07" & initial_school_id != "S07"
+
+  )
+
+
+
+assess$pre.percentage_math_score_MC <- assess$pre.percentage_math_score- mean(assess$pre.percentage_math_score)
+
+
+stan_data <-  list(N=nrow(assess), 
+                   y=assess$post.percentage_math_score,
+                   pretest_MC=assess$pre.percentage_math_score_MC)
+
+
+```
+
+
+
+## Fit Part 1 Model
+```{r}
+
+fit1 <- stan(file = 'HW4stanScript1.stan',
+            data = stan_data1)
+
+```
+
+## Save Part 1 Model
+```{r}
+save(fit1,file="unidentifiedFit.RData") 
+```
+
+
+Once the model has fit, look at the estimates, Rhats, and traceplots for the coefficients and sigma. What do you notice?
+Use the extract() function to look at the MCMC samples. make a scatterplot of the samples for b1a against those for b1b--why do you think you get that pattern?  
+
+```{R}
+print(fit2)
+```
+
+How do I evaluate the Coefficients For example: b2 CIs (maybe that is not what they are) overlap zero. Does this mean that we can't say that it is 95% probable that the effect of FH2T is not zero? I'm I think about this incorrectly because are not doing null hypotheses testing.
+ 
+
+```{R}
+traceplot(fit2,inc_warmup =F)
+
+```
+
+
+# Part 2
+
+Part 2: the magic of a prior
+Take the unidentified model, and add two lines to the beginning of the "model" section:
+b1a~std_normal();
+b1b~std_normal();
+These put a N(0,1) prior on b1a and b1b. Now refit the model (it should go much faster), and repeat the diagnostics from last time. What happened?
+
+
+
+
+
+
+Extra credit: (I mean, I'm not actually grading this with points but whatever)
+Use the MCMC samples from extract() in the 2nd model you just fit (the one with the normal priors) to answer these questions:
+(if you don't know how to do this immediately, try to figure it out, just by thinking--you don't need to look stuff up. If the answer doesn't come to you, we'll work it out together on Thursday)
+What's the posterior probability that BAU (assistments with delayed feedback) is worse than FH2T?
+What's the posterior probability BAU is worse than all the other conditions? (ie. Pr(BAU is worse than assistments & BAU is worse than FH2T & BAU is worse than dragonbox|data))
+Estimate a central 95% credible interval for the (pretest-adjusted) difference between the average posttest score under BAU and the _worse_ of the other 3 conditions (accounting for the fact that we're not necessarily sure which one that is)
+
