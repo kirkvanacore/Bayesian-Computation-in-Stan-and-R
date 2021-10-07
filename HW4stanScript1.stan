@@ -13,20 +13,19 @@ data {
   int<lower=0> N;
   vector[N] y;
   vector[N] pretest_MC;
+  vector[N] FH2T;
+  vector[N] Dragon;
+  vector[N] ASSISTments;
 }
 
-// yi = b0 + b1xi1 + ei
-// ei ~ N(0, sigma)
-// yi ~ N(b0 + b1xi1, sigma) <- This is the modle
-
-
-// The parameters accepted by the model. Our model
-// accepts two parameters 'mu' and 'sigma'.
 parameters {
   real<lower=0> sigma;
   real b0;
   real b1a;
   real b1b;
+  real b2;
+  real b3;
+  real b4;
 }
 
 transformed parameters {
@@ -34,10 +33,10 @@ transformed parameters {
   b1=b1a+b1b;
 }
 
-// The model to be estimated. We model the output
-// 'y' to be normally distributed with mean 'mu'
-// and standard deviation 'sigma'.
+//Y=b0+(b1a+b1b)*pretest+b2*FH2T + b3*Dragon+ b4*ASSISTments+epsilon
+
 model {
-  y ~ normal(b0 + (b1a+b1b)*pretest_MC
+  y ~ normal(b0 + (b1a+b1b)*pretest_MC + b2*FH2T + b3*Dragon + b4*ASSISTments
 , sigma);
 }
+
