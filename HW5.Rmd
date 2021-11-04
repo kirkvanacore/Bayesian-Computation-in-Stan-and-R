@@ -1,0 +1,142 @@
+---
+title: "Homework 4"
+author: "Kirk Vanacore"
+date: "11/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+```{r}
+data<-read.csv("data_assignment5.csv")
+```
+## Models - One Exposure (one row per student)
+### Random Intercept Only
+
+$$\hat{y}\sim\log(\beta_{0j}+\beta_{2} Treatement_{1i}+\beta_2 PriorAccuracy_{2j}+e_ij)$$
+  $$\beta_0 = \gamma_{00} + \gamma_{02} ProblemDifficulty_{j} + \mu_{0i} $$
+_I'm not sure that the Problem Difficulty is in the right place._
+
+#### glmer code
+```{r}
+# m1 <- glmer(
+#   next_problem_correctness_complete ~
+#       treatment +
+#         prior_accuracy + 
+#         problem_avg_accuracy +
+#   (1|problem_id) ,
+#   data = data,
+#   family = binomial)
+# summary(m1)
+```
+_Note that problem_avg_accuracy is a measure of problem difficulty._
+
+
+#### STAN CODE
+
+``` 
+data {
+  
+}
+
+parameters {
+  
+}
+
+transformed parameters {
+  
+}
+
+
+model {
+ 
+}
+```
+
+
+### Random Intercept and Random Effect Treatment
+
+$$\hat{y}\sim\log(\beta_{0j}+\beta_{2} Treatement_{1i}+\beta_2 PriorAccuracy_{2j}+e_ij)$$ 
+  $$\beta_0 = \gamma_{00} + \gamma_{02} ProblemDifficulty_{j} + \mu_{0i} $$
+  $$\beta_1 = \gamma_{10} + \mu_{1i} $$
+
+#### glmer code
+```{r}
+# m1 <- glmer(
+#   next_problem_correctness_complete ~
+#       treatment +
+#         prior_accuracy + 
+#         problem_avg_accuracy +
+#   (1+treatment|problem_id) ,
+#   data = data,
+#   family = binomial)
+# summary(m1)
+```
+_Note that problem_avg_accuracy is a measure of problem difficulty._
+
+
+#### STAN CODE
+
+``` 
+data {
+  
+}
+
+parameters {
+  
+}
+
+transformed parameters {
+  
+}
+
+
+model {
+ 
+}
+```
+### Random Intercept and Random Effect Treatment with cross Level Interaction
+
+$$\hat{y}\sim\log(\beta_{0j}+\beta_{2} Treatement_{1i}+\beta_2 PriorAccuracy_{2j}+e_ij)$$ 
+  $$\beta_0 = \gamma_{00} + \gamma_{02} ProblemDifficulty_{j} + \mu_{0i} $$
+  $$\beta_1 = \gamma_{10} + \gamma_{12} ProblemDifficulty_{j} + \mu_{1i} $$
+  
+#### glmer code
+```{r}
+# m1 <- glmer(
+#   next_problem_correctness_complete ~
+#       treatment +
+#         prior_accuracy + 
+#         problem_avg_accuracy +
+#         problem_avg_accuracy*treatment +
+#   (1+treatment|problem_id) ,
+#   data = data,
+#   family = binomial)
+# summary(m1)
+```
+_Note that problem_avg_accuracy is a measure of problem difficulty._
+
+
+#### STAN CODE
+
+``` 
+data {
+  
+}
+
+parameters {
+  
+}
+
+transformed parameters {
+  
+}
+
+
+model {
+ 
+}
+```
